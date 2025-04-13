@@ -1,5 +1,6 @@
-import {Interview, ConversationStatus} from '../conversationController';
+import {Conversation, ConversationStatus} from '../conversationController';
 
+//system prompt for question answering
 export const systemPrompt = `You are conducting an interview for a forklift operator role in New Jersey. Answer the user's question about the role based on the following job description. If you are not able to answer, inform the user that you are not able to answer their question. Do not end your response with a question.
 
         Job Title: Forklift Operator
@@ -44,7 +45,7 @@ export const systemPrompt = `You are conducting an interview for a forklift oper
         401(k) with company match.
         Training and development opportunities.`;
 
-const interview = new Interview('0-0');
+const interview = new Conversation('0-0');
 
 
 //setup interview script

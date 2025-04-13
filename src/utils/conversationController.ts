@@ -25,7 +25,7 @@ export interface ConversationState {
     flags: Record<string, boolean>
 }
 
-export class Interview {
+export class Conversation {
     private dialogueTree: Map<string, DialogueNode>;
     private state: ConversationState;
 
@@ -100,7 +100,7 @@ export class Interview {
         const currentNode = this.getCurrentNode();
         if (currentNode === null){
             this.updateStatus(ConversationStatus.Completed)
-            return 'The interview is concluded.'
+            return 'The conversation is concluded.'
         } else {
             return currentNode.text
         }

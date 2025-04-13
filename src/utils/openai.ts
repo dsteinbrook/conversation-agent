@@ -1,7 +1,7 @@
 import {OpenAI} from 'openai';
 import {zodResponseFormat} from "openai/helpers/zod";
 import {z} from "zod";
-import {systemPrompt} from './scripts/interviewScript';
+import {systemPrompt} from './scripts/gameNPC';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

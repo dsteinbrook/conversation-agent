@@ -1,5 +1,5 @@
 import { ConversationStatus, ConversationState } from "@/utils/conversationController";
-import conversation from '@/utils/scripts/interviewScript';
+import conversation from '@/utils/scripts/gameNPC';
 import {NextResponse} from 'next/server';
 import {classifyUserMessage, answerUserQuestion} from '@/utils/openai'
 import {getConversationState, saveConversationStateAndMessages} from "@/utils/db";
