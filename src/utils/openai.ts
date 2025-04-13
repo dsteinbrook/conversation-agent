@@ -17,13 +17,13 @@ interface ChatMessage {
   }
 
 //classify user message as one of the options using openai structured outputs
-export async function classifyUserMessage(userMessage: string, options: string[]) {
+export async function classifyUserMessage(messages: ChatMessage[], options: string[]) {
     if (options.length <= 1){
         return 0
     }
     try {
  
-     if (!userMessage.trim()) {
+     if (!messages[messages.length-1].content.trim()) {
          throw new Error('User message cannot be empty');
        }
        
@@ -34,8 +34,8 @@ export async function classifyUserMessage(userMessage: string, options: string[]
    
    // Create the system prompt
    const systemPrompt = `
-        You are a classification assistant. Your task is to classify the user's message into exactly one of the provided options.
-        Choose the option that best matches the user's message.
+        You are a classification assistant. Your task is to classify the last user message into exactly one of the provided options.
+        Choose the option that best matches the user's message, given the context of the previous conversation.
         
         Available options:
         ${formattedOptions}
@@ -52,10 +52,7 @@ export async function classifyUserMessage(userMessage: string, options: string[]
          {
              role: 'system',
              content: systemPrompt
-         }, {
-             role: 'user',
-             content: userMessage
-         }
+         }, ...messages
  
      ],
      response_format: zodResponseFormat(ClassificationSchema, 'option')
@@ -121,7 +118,7 @@ export async function classifyUserMessage(userMessage: string, options: string[]
         const messages = [{role: 'system', content: systemPrompt}, ...previousMessages] as ChatMessage[];
 
         const response = await openai.chat.completions.create({
-            model: 'gpt-4',
+            model: 'gpt-4o',
             messages: messages.map((msg: ChatMessage) => ({
               role: msg.role,
               content: msg.content,
