@@ -74,7 +74,7 @@ export default function Home() {
       setHasMoreConversations(result.hasMore);
       setConversations(prev => reset ? result.conversations : [...prev, ...result.conversations]);
       setCurrentPage(page);
-      return result.conversations.length;
+      return result.conversations[0].id + 1;
     } catch (error) {
       console.error('Error loading conversations:', error);
     } finally {
@@ -186,7 +186,7 @@ export default function Home() {
       e.preventDefault();
 
       if (!currentConversationId) {
-        await startNewConversation(conversations.length);
+        await startNewConversation(conversations[0].id + 1);
       }
 
       const userMessage: Message = { role: 'user', content: input.trim() };
@@ -249,7 +249,7 @@ export default function Home() {
             fullWidth
             variant="contained"
             startIcon={<Add />}
-            onClick={() => {startNewConversation(conversations.length)}}
+            onClick={async () => { await startNewConversation(conversations[0].id + 1)}}
           >
             New Conversation
           </Button>
