@@ -1,5 +1,7 @@
 # interview-bot
 
+## screencap
+
 ![](https://giphy.com/gifs/AMeISoXxTSWQU1YR0K)
 
 ## usage
