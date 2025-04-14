@@ -1,5 +1,7 @@
 # interview-bot
 
+![](https://giphy.com/gifs/AMeISoXxTSWQU1YR0K)
+
 ## usage
 
 clone repo onto local machine (requires sqlite installed, comes by default with macOS) and navigate to root directory.

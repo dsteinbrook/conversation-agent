@@ -1,6 +1,7 @@
 import {OpenAI} from 'openai';
 import {zodResponseFormat} from "openai/helpers/zod";
 import {z} from "zod";
+import {systemPrompt} from './scripts/gameNPC';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -17,13 +18,13 @@ interface ChatMessage {
   }
 
 //classify user message as one of the options using openai structured outputs
-export async function classifyUserMessage(userMessage: string, options: string[]) {
+export async function classifyUserMessage(messages: ChatMessage[], options: string[]) {
     if (options.length <= 1){
         return 0
     }
     try {
  
-     if (!userMessage.trim()) {
+     if (!messages[messages.length-1].content.trim()) {
          throw new Error('User message cannot be empty');
        }
        
@@ -34,8 +35,8 @@ export async function classifyUserMessage(userMessage: string, options: string[]
    
    // Create the system prompt
    const systemPrompt = `
-        You are a classification assistant. Your task is to classify the user's message into exactly one of the provided options.
-        Choose the option that best matches the user's message.
+        You are a classification assistant. Your task is to classify the last user message into exactly one of the provided options.
+        Choose the option that best matches the user's message, given the context of the previous conversation.
         
         Available options:
         ${formattedOptions}
@@ -52,10 +53,7 @@ export async function classifyUserMessage(userMessage: string, options: string[]
          {
              role: 'system',
              content: systemPrompt
-         }, {
-             role: 'user',
-             content: userMessage
-         }
+         }, ...messages
  
      ],
      response_format: zodResponseFormat(ClassificationSchema, 'option')
@@ -74,54 +72,10 @@ export async function classifyUserMessage(userMessage: string, options: string[]
  export async function answerUserQuestion(previousMessages: ChatMessage[]){
     try {
 
-        const systemPrompt = `You are conducting an interview for a forklift operator role in New Jersey. Answer the user's question about the role based on the following job description. If you are not able to answer, inform the user that you are not able to answer their question. Do not end your response with a question.
-
-        Job Title: Forklift Operator
-
-        Location: Jersey City, NJ / Trenton, NJ
-        Company: [Company Name]
-        Job Type: Full-time
-
-        Job Description:
-        We are seeking a reliable and safety-conscious Forklift Operator to join our team at [Company Name]. As a Forklift Operator, you will play a key role in ensuring smooth and efficient warehouse operations. You will be responsible for moving materials, loading/unloading shipments, and maintaining a safe working environment while operating various types of forklifts.
-
-        Key Responsibilities:
-
-        Operate sit-down and stand-up forklifts to move materials throughout the warehouse.
-        Load and unload shipments from trucks and containers.
-        Organize and stack inventory in designated areas to ensure efficient storage.
-        Inspect and maintain forklift equipment to ensure it is in good working condition.
-        Safely handle goods and materials, ensuring proper stacking and placement to prevent damage.
-        Follow all safety protocols and comply with OSHA regulations.
-        Assist with inventory control, including periodic stock counts and reporting discrepancies.
-        Perform other warehouse duties as assigned.
-        Qualifications:
-
-        High school diploma or GED.
-        Valid forklift certification (or willing to obtain upon hire).
-        Prior experience operating forklifts in a warehouse or industrial setting preferred.
-        Strong attention to detail and ability to maintain accurate records.
-        Ability to work in a fast-paced environment and meet deadlines.
-        Excellent communication and teamwork skills.
-        Must be able to lift up to 50 lbs and stand for extended periods.
-        Availability to work in Jersey City or Trenton, NJ.
-        Working Conditions:
-
-        Full-time position.
-        Monday through Friday, with occasional overtime based on business needs.
-        Warehouse environment with potential exposure to loud noise, temperature changes, and heavy machinery.
-        Benefits:
-
-        25 dollars/hour and overtime opportunities.
-        Health, dental, and vision insurance.
-        Paid time off (PTO) and holidays.
-        401(k) with company match.
-        Training and development opportunities.`;
-
         const messages = [{role: 'system', content: systemPrompt}, ...previousMessages] as ChatMessage[];
 
         const response = await openai.chat.completions.create({
-            model: 'gpt-4',
+            model: 'gpt-4o',
             messages: messages.map((msg: ChatMessage) => ({
               role: msg.role,
               content: msg.content,

@@ -27,6 +27,15 @@ export interface DBConversation {
   updated_at: string;
 }
 
+interface SaveConversationData {
+  conversationId: number;
+  state: string;
+  messages: {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+  }[];
+}
+
 // Get database connection
 async function getDb() {
   return open({
@@ -159,6 +168,38 @@ export async function setConversationState(conversationId: number, state: string
       state,
       conversationId
     );
+  } finally {
+    await db.close();
+  }
+}
+
+// Save conversation state and messages in a single transaction
+export async function saveConversationStateAndMessages(data: SaveConversationData): Promise<void> {
+  const db = await getDb();
+  try {
+    await db.run('BEGIN TRANSACTION');
+
+    // Update conversation state
+    await db.run(
+      'UPDATE conversations SET state = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      data.state,
+      data.conversationId
+    );
+
+    // Insert all messages
+    for (const message of data.messages) {
+      await db.run(
+        'INSERT INTO messages (conversation_id, role, content) VALUES (?, ?, ?)',
+        data.conversationId,
+        message.role,
+        message.content
+      );
+    }
+
+    await db.run('COMMIT');
+  } catch (error) {
+    await db.run('ROLLBACK');
+    throw error;
   } finally {
     await db.close();
   }

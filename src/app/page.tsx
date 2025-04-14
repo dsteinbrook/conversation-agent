@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { TextField, Paper, Box, Typography, Button, List, ListItemButton, ListItemText, Drawer, CircularProgress } from '@mui/material';
 import { DBConversation, createConversation, getConversations, getConversationMessages } from '@/utils/db';
 import {Add} from '@mui/icons-material';
-import {ConversationStatus} from '../utils/interviewController';
+import {ConversationStatus} from '../utils/conversationController';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -74,7 +74,7 @@ export default function Home() {
       setHasMoreConversations(result.hasMore);
       setConversations(prev => reset ? result.conversations : [...prev, ...result.conversations]);
       setCurrentPage(page);
-      return result.conversations.length;
+      return result.conversations[0].id + 1;
     } catch (error) {
       console.error('Error loading conversations:', error);
     } finally {
@@ -88,10 +88,10 @@ export default function Home() {
     }
   };
 
-  const fetchInterview = async (request: RequestType) => {
+  const fetchConversation = async (request: RequestType) => {
 
     try {
-      const response = await fetch('/api/interview', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export default function Home() {
 
       setIsLoading(true);
 
-      const response = await fetch('/api/interview', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ export default function Home() {
       e.preventDefault();
 
       if (!currentConversationId) {
-        await startNewConversation(conversations.length);
+        await startNewConversation(conversations[0].id + 1);
       }
 
       const userMessage: Message = { role: 'user', content: input.trim() };
@@ -195,11 +195,11 @@ export default function Home() {
       setIsLoading(true);
 
       try {
-        const data = await fetchInterview({messages: [...messages, userMessage], conversationId: currentConversationId as number, newQuestion: false});
+        const data = await fetchConversation({messages: [...messages, userMessage], conversationId: currentConversationId as number, newQuestion: false});
         //request another question from bot without user input
         if (data.skipUserInput){
 
-          const newData = await fetchInterview({messages: [...messages, userMessage], conversationId: currentConversationId as number, newQuestion: true});
+          const newData = await fetchConversation({messages: [...messages, userMessage], conversationId: currentConversationId as number, newQuestion: true});
           setStatus(newData.status);
           const assistantMessage: Message = {
             role: 'assistant',
@@ -249,9 +249,9 @@ export default function Home() {
             fullWidth
             variant="contained"
             startIcon={<Add />}
-            onClick={() => {startNewConversation(conversations.length)}}
+            onClick={async () => { await startNewConversation(conversations[0].id + 1)}}
           >
-            New Interview
+            New Conversation
           </Button>
         </Box>
         <List sx={{ overflow: 'auto', flex: 1, position: 'relative' }}>
@@ -325,7 +325,7 @@ export default function Home() {
               <CircularProgress />
               </Paper>}
               {
-                status === ConversationStatus.Completed && <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem'}}><Typography variant="h5" color="success">{'The interview is complete.'}</Typography></div>
+                status === ConversationStatus.Completed && <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem'}}><Typography variant="h5" color="success">{'The conversation is complete.'}</Typography></div>
               }
             <div ref={messagesEndRef} />
           </Box>
