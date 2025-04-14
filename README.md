@@ -20,7 +20,7 @@ npm run dev
 
 ## about
 
-Demo implementatio of a conversational agent that follows a configurable script for a conversation, using Next.js/typescript. For chatbot use cases that require more structure than a default LLM, such as a videogame NPC, call center agent, or ai job interviewer.
+Demo implementation of a conversational agent that follows a configurable script for a conversation, using Next.js/typescript. For chatbot use cases that require more structure than a default LLM, such as a videogame NPC, call center agent, or ai job interviewer.
 
 The agent works by following a script using the conversation class declared in ```src/utils/conversationController.ts```. Two sample scripts are provided, one for a videogame NPC in ```src/utils/scripts/gameNPC.ts``` job interview in ```src/utils/scripts/interview.ts```. To switch out the sample scripts or add your own, update the imports in ```src/app/api/chat/route.ts``` and ```src/utils/openai.ts```
 
